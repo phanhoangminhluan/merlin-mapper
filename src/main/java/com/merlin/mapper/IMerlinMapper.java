@@ -2,7 +2,7 @@ package com.merlin.mapper;
 
 import java.util.Collection;
 
-public interface BaseMapping<E> {
+public interface IMerlinMapper<E> {
 
     <T> T toDTO(E entity, Class<T> targetClass) throws Exception;
 

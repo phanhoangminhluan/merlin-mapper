@@ -1,7 +1,7 @@
 package com.merlin.mapper.handler;
 
 
-import com.merlin.mapper.MerlinMapper;
+import com.merlin.mapper.utils.MerlinMapperUtils;
 import com.merlin.mapper.annotations.MappingField;
 
 import java.lang.reflect.*;
@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 
 public class MapperHandler<S, T> {
 
-    Logger logger = Logger.getLogger(MerlinMapper.class.getName());
+    Logger logger = Logger.getLogger(MerlinMapperUtils.class.getName());
 
     private S sourceObject;
     private Class sourceClass;
@@ -38,7 +38,7 @@ public class MapperHandler<S, T> {
         if (methodName == null) return false;
         boolean hasSet = false;
         try {
-            Method method = this.sourceClass.getDeclaredMethod(methodName);
+            Method method = this.sourceClass.getMethod(methodName);
             this.sourceGetterMethod = method;
             hasSet = true;
         } catch (NoSuchMethodException e) {
@@ -52,7 +52,7 @@ public class MapperHandler<S, T> {
         if (methodName == null || paramType == null) return false;
         boolean hasSet = false;
         try {
-            Method method = this.targetClass.getDeclaredMethod(methodName, paramType);
+            Method method = this.targetClass.getMethod(methodName, paramType);
             this.targetSetterMethod = method;
             hasSet = true;
         } catch (NoSuchMethodException e) {

@@ -1,7 +1,7 @@
 package com.merlin.mapper.handler;
 
 
-import com.merlin.mapper.MerlinMapper;
+import com.merlin.mapper.utils.MerlinMapperUtils;
 import com.merlin.mapper.annotations.MappingField;
 import com.merlin.mapper.annotations.SourceFieldConfig;
 import com.merlin.mapper.annotations.TargetFieldConfig;
@@ -15,7 +15,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 public class MiluMapperUtils {
-    static Logger logger = Logger.getLogger(MerlinMapper.class.getName());
+    static Logger logger = Logger.getLogger(MerlinMapperUtils.class.getName());
 
     public static ArrayList<Field> getAllAnnotatedFields(Object source, Class<? extends Annotation> annotation) {
         Field[] fields = source.getClass().getDeclaredFields();
@@ -38,6 +38,12 @@ public class MiluMapperUtils {
         return (fieldName.charAt(0) + "").toUpperCase() + fieldName.substring(1);
     }
 
+    public static boolean startWithIs(String fieldName) {
+        if (fieldName.length() < 2) return false;
+        String firstTwoLetters = fieldName.substring(0, 2);
+        return firstTwoLetters.equalsIgnoreCase("is");
+    }
+
     public static String getSourceFieldName(Field targetField, Class targetClass) {
         String targetFieldName = targetField.getName();
 
@@ -52,7 +58,16 @@ public class MiluMapperUtils {
     public static String getSourceGetterMethodName(Field targetField, Class desiredSourceClass, Class targetClass) throws Exception {
         String targetFieldName = targetField.getName();
         MappingField mappingField = targetField.getDeclaredAnnotation(MappingField.class);
-        String defaultGetterMethod = "get" + MiluMapperUtils.toUppercaseTheFirstLetter(targetFieldName);
+        String defaultGetterMethod;
+        if (targetField.getType() == boolean.class || targetField.getType() == Boolean.class) {
+            if (startWithIs(targetFieldName)) {
+                defaultGetterMethod = targetFieldName;
+            } else {
+                defaultGetterMethod = "is" + MiluMapperUtils.toUppercaseTheFirstLetter(targetFieldName);
+            }
+        } else {
+            defaultGetterMethod = "get" + MiluMapperUtils.toUppercaseTheFirstLetter(targetFieldName);
+        }
         if (mappingField.sourceFieldConfigs().length > 0) {
             SourceFieldConfig selectedConfig = null;
             SourceFieldConfig[] sourceFieldConfigs = mappingField.sourceFieldConfigs();
@@ -94,6 +109,14 @@ public class MiluMapperUtils {
         String targetFieldName = targetField.getName();
         MappingField mappingField = targetField.getDeclaredAnnotation(MappingField.class);
         String defaultSetterMethod = "set" + MiluMapperUtils.toUppercaseTheFirstLetter(targetFieldName);
+        if (targetField.getType() == boolean.class || targetField.getType() ==  Boolean.class) {
+            if (startWithIs(targetFieldName)) {
+                String tempTargetFieldName = targetFieldName.substring(3);
+                defaultSetterMethod = "set" + MiluMapperUtils.toUppercaseTheFirstLetter(tempTargetFieldName);
+            }
+        } else {
+            defaultSetterMethod = "set" + MiluMapperUtils.toUppercaseTheFirstLetter(targetFieldName);
+        }
         if (mappingField.targetFieldConfigs().length > 0) {
             TargetFieldConfig selectedConfig = null;
             TargetFieldConfig[] sourceFieldConfigs = mappingField.targetFieldConfigs();
